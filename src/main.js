@@ -1,5 +1,5 @@
 import makeFilter from './make-filter.js';
-import makeFilm from './make-task.js';
+import makeFilm, {getFilm} from './make-film.js';
 
 const doc = document;
 
@@ -23,10 +23,10 @@ const filmsContainer = document.querySelector(`.films .films-list__container`);
 const filmsTop = document.querySelectorAll(`.films-list--extra .films-list__container`);
 
 const renderFilms = (dist, number = 7) => {
-  const films = new Array(number)
-    .fill()
-    .map(makeFilm);
-  dist.insertAdjacentHTML(`beforeend`, films.join(``));
+  dist.insertAdjacentHTML(`beforeend`, new Array(number)
+    .fill(``)
+    .map(() => makeFilm(getFilm()))
+    .join(``));
 };
 
 renderFilms(filmsContainer);
@@ -49,3 +49,5 @@ for (let filterItem of filterItems) {
     }
   });
 }
+
+
