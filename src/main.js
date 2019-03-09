@@ -1,5 +1,7 @@
-import makeFilter from './make-filter.js';
-import makeFilm, {getFilm} from './make-film.js';
+import makeFilter from './make-filter';
+import Film from './film';
+import getFilm from './getFilm';
+import Popup from './popup';
 
 const doc = document;
 
@@ -22,17 +24,30 @@ filters.insertAdjacentHTML(`afterBegin`, filter);
 const filmsContainer = document.querySelector(`.films .films-list__container`);
 const filmsTop = document.querySelectorAll(`.films-list--extra .films-list__container`);
 
-const renderFilms = (dist, number = 7) => {
-  dist.insertAdjacentHTML(`beforeend`, new Array(number)
-    .fill(``)
-    .map(() => makeFilm(getFilm()))
-    .join(``));
+const renderFilms = (dist, number) => {
+  for (let i = 0; i < number; i++) {
+    const film = getFilm();
+    const filmComponent = new Film(film);
+    const popup = new Popup(film);
+
+    dist.appendChild(filmComponent.render());
+
+    filmComponent.onClick = () => {
+      popup.render();
+      doc.querySelector(`body`).append(popup.element);
+    };
+
+    popup.onClick = () => {
+      doc.querySelector(`.film-details`).remove();
+      popup.unrender();
+    };
+  }
 };
 
-renderFilms(filmsContainer);
+renderFilms(filmsContainer, 7);
 
 for (let block of filmsTop) {
-  renderFilms(block, 2);
+  renderFilms(block, 7);
 }
 
 const filterItems = doc.querySelectorAll(`.main-navigation__item`);
