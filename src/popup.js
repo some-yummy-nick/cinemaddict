@@ -1,12 +1,9 @@
-const createElement = (template) => {
-  const newElement = document.createElement(`div`);
-  newElement.innerHTML = template;
-  return newElement.firstChild;
-};
+import Component from './component';
 
-export default class Popup {
+export default class Popup extends Component {
 
   constructor(data) {
+    super();
     this._poster = data.poster;
     this._title = data.title;
     this._rating = data.rating;
@@ -14,7 +11,6 @@ export default class Popup {
     this._description = data.description;
     this._isFavorite = data.isFavorite;
     this._comments = data.comments;
-    this._element = null;
     this._onClick = null;
     this._onCloseClick = this._onCloseClick.bind(this);
   }
@@ -190,21 +186,6 @@ export default class Popup {
   </form>
 </section>
     `.trim();
-  }
-
-  get element() {
-    return this._element;
-  }
-
-  render() {
-    this._element = createElement(this.template);
-    this.bind();
-    return this._element;
-  }
-
-  unrender() {
-    this.unbind();
-    this._element = null;
   }
 
   bind() {

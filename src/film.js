@@ -1,11 +1,8 @@
-const createElement = (template) => {
-  const newElement = document.createElement(`div`);
-  newElement.innerHTML = template;
-  return newElement.firstChild;
-};
+import Component from './component';
 
-export default class Film {
+export default class Film extends Component {
   constructor(data) {
+    super();
     this._title = data.title;
     this._rating = data.rating;
     this._poster = data.poster;
@@ -14,10 +11,8 @@ export default class Film {
     this._genre = data.genre;
     this._description = data.description;
     this._comments = data.comments;
-    this._element = null;
     this._onClick = null;
     this._onCommentsButtonClick = this._onCommentsButtonClick.bind(this);
-
   }
 
   _onCommentsButtonClick() {
@@ -50,12 +45,6 @@ export default class Film {
           </form>
         </article>
     `.trim();
-  }
-
-  render() {
-    this._element = createElement(this.template);
-    this.bind();
-    return this._element;
   }
 
   bind() {
