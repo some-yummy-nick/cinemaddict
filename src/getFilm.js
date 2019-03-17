@@ -28,8 +28,14 @@ export default function getFilm() {
     date: Date.now() - Math.floor(Math.random() * 7) * 30 * 12 * 7 * 24 * 60 * 60 * 1000,
     duration: new Date(Math.floor(Math.random() * 60) * 5 * 60 * 1000),
     isFavorite: [true, false][Math.floor(Math.random() * 2)],
-    comments: getRandomInt(0, 50),
+    comments: [{
+      text: `So long-long story dude, boring!`,
+      emoji: `😐`,
+      author: `Tim Macoveev`,
+      date: Date.now() - Math.floor(Math.random() * 7) * 24 * 60 * 60 * 1000,
+    }],
     genre: [`Comedy`, `Thriller`, `Horror`, `Adventures`, `Romantic`, `Drama`, `Action`, `Detective`, `Mystic`, `Documentary`, `Fantasy`][Math.floor(Math.random() * 11)],
-    rating: (Math.random() * (10 - 2 + 1) + 2).toFixed(1)
+    rating: (Math.random() * (10 - 2 + 1) + 2).toFixed(1),
+    score: 5,
   };
 }
