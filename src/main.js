@@ -38,8 +38,21 @@ const renderFilms = (dist, number) => {
     };
 
     popup.onClick = () => {
-      doc.querySelector(`.film-details`).remove();
       popup.unrender();
+    };
+
+    popup.onSetComment = (formdata) => {
+      film.comments.push(formdata.comments);
+      popup.update(film);
+      filmComponent.update(film);
+    };
+
+    popup.onSetRating = (formdata) => {
+      if (formdata.comments.text !== ``) {
+        film.comments.push(formdata.comments);
+      }
+      film.score = formdata.score;
+      popup.update(film);
     };
   }
 };
