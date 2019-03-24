@@ -1,32 +1,51 @@
-import makeFilter from './make-filter';
+import filmCommon from './film-common';
 import Film from './film';
-import getFilm from './getFilm';
+import Filter from './filter';
 import Popup from './popup';
+import {getRandomInRange} from './utils';
 
 const doc = document;
 
-const getRandomInRange = (min = 1, max = 100) => {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-};
-
-const filter = `
- ${makeFilter(`all`, null, `active`)}
- ${makeFilter(`watchlist`, getRandomInRange())}
- ${makeFilter(`history`, getRandomInRange())} 
- ${makeFilter(`favorites`, getRandomInRange())}
- ${makeFilter(`stats`, null, `additional`)}
- `;
-
-const filters = doc.querySelector(`.main-navigation`);
-
-filters.insertAdjacentHTML(`afterBegin`, filter);
-
-const filmsContainer = document.querySelector(`.films .films-list__container`);
+const filmsContainer = doc.querySelector(`.films .films-list__container`);
+const filtersContainer = doc.querySelector(`.main-navigation`);
 const filmsTop = document.querySelectorAll(`.films-list--extra .films-list__container`);
 
-const renderFilms = (dist, number) => {
-  for (let i = 0; i < number; i++) {
-    const film = getFilm();
+const filtersArray = [`all`, `watchlist`, `history`];
+
+for (let name of filtersArray) {
+  const filter = new Filter({title: `${name}`});
+  filtersContainer.appendChild(filter.render());
+  const films = filmCommon(7);
+
+  filter.onFilter = (filterName) => {
+    switch (filterName) {
+      case `all`:
+        return renderFilms(filmsContainer, films);
+
+      case `watchlist`: {
+        const newArr = films.filter((it) => it.isWatchList);
+        return renderFilms(filmsContainer, newArr);
+      }
+
+      case `history`: {
+        const newArr = films.filter((it) => it.isWatched);
+        return renderFilms(filmsContainer, newArr);
+      }
+
+      default:
+        return false;
+    }
+
+  };
+
+}
+
+
+const renderFilms = (dist, films) => {
+  dist.innerHTML = ``;
+
+  for (let i = 0; i < films.length; i++) {
+    const film = films[i];
     const filmComponent = new Film(film);
     const popup = new Popup(film);
 
@@ -65,25 +84,10 @@ const renderFilms = (dist, number) => {
   }
 };
 
-renderFilms(filmsContainer, 7);
+renderFilms(filmsContainer, filmCommon(7));
 
 for (let block of filmsTop) {
-  renderFilms(block, 7);
-}
-
-const filterItems = doc.querySelectorAll(`.main-navigation__item`);
-
-for (let filterItem of filterItems) {
-  filterItem.addEventListener(`click`, () => {
-    const randomNumber = getRandomInRange(1, 10);
-    filmsContainer.innerHTML = ``;
-    renderFilms(filmsContainer, randomNumber);
-    for (let block of filmsTop) {
-      block.innerHTML = ``;
-      const anotherRandomNumber = getRandomInRange(1, 5);
-      renderFilms(block, anotherRandomNumber);
-    }
-  });
+  renderFilms(block, filmCommon(getRandomInRange(1, 5)));
 }
 
 
