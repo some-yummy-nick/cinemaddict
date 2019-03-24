@@ -37,6 +37,14 @@ const renderFilms = (dist, number) => {
       doc.querySelector(`body`).append(popup.element);
     };
 
+    filmComponent.onAddToWatchList = () => {
+      popup._isWatchList = !popup._isWatchList;
+    };
+
+    filmComponent.onMarkAsWatched = () => {
+      popup._isWatched = !popup._isWatched;
+    };
+
     popup.onClick = () => {
       popup.unrender();
     };

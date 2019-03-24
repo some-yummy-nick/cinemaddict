@@ -28,6 +28,8 @@ export default function getFilm() {
     date: Date.now() - Math.floor(Math.random() * 7) * 30 * 12 * 7 * 24 * 60 * 60 * 1000,
     duration: new Date(Math.floor(Math.random() * 60) * 5 * 60 * 1000),
     isFavorite: [true, false][Math.floor(Math.random() * 2)],
+    isWatched: false,
+    isWatchList: false,
     comments: [{
       text: `So long-long story dude, boring!`,
       emoji: `😐`,
