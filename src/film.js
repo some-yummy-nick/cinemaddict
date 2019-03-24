@@ -13,6 +13,8 @@ export default class Film extends Component {
     this._genre = data.genre;
     this._description = data.description;
     this._comments = data.comments;
+    this._isWatched = data.isWatched;
+    this._isWatchList = data.isWatchList;
     this._onClick = null;
     this._onAddToWatchList = null;
     this._onMarkAsWatched = null;
@@ -23,6 +25,8 @@ export default class Film extends Component {
 
   update(data) {
     this._comments = data.comments;
+    this._isWatched = data.isWatched;
+    this._isWatchList = data.isWatchList;
     this.element.querySelector(`.film-card__comments`).textContent = `${this._comments.length} comments`;
   }
 

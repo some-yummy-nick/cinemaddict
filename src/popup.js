@@ -36,6 +36,8 @@ export default class Popup extends Component {
   update(data) {
     this._comments = data.comments;
     this._score = data.score;
+    this._isWatched = data.isWatched;
+    this._isWatchList = data.isWatchList;
     this.element.querySelector(`.film-details__comments-list`).innerHTML = Popup._onAddComment(this._comments);
     this.element.querySelector(`.film-details__comment-input`).value = ``;
     this.element.querySelector(`.film-details__user-rating`).textContent = `Your rate ${this._score}`;

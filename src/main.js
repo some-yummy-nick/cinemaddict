@@ -17,54 +17,64 @@ const films = filmCommon(7);
 
 const filtersArray = [`all`, `watchlist`, `history`, `stats`];
 
-for (let name of filtersArray) {
-  const filter = new Filter({title: `${name}`});
-  filtersContainer.appendChild(filter.render());
+function setFilter() {
+  filtersContainer.innerHTML = ``;
 
-  filter.onFilter = (filterName) => {
-    switch (filterName) {
-      case `all`:
-        return renderFilms(filmsContainer, films);
+  for (let name of filtersArray) {
+    const filter = new Filter({title: `${name}`});
+    filtersContainer.appendChild(filter.render());
 
-      case `watchlist`: {
-        const newArr = films.filter((it) => it.isWatchList);
-        return renderFilms(filmsContainer, newArr);
+    filter.onFilter = (filterName) => {
+      switch (filterName) {
+        case `all`:
+          return renderFilms(filmsContainer, films);
+
+        case `watchlist`: {
+          const newArr = films.filter((it) => it.isWatchList);
+          return renderFilms(filmsContainer, newArr);
+        }
+
+        case `history`: {
+          const newArr = films.filter((it) => it.isWatched);
+          return renderFilms(filmsContainer, newArr);
+        }
+
+        case `stats`: {
+          return statistics(films);
+        }
+
+        default:
+          return false;
       }
 
-      case `history`: {
-        const newArr = films.filter((it) => it.isWatched);
-        return renderFilms(filmsContainer, newArr);
-      }
+    };
 
-      case `stats`: {
-        return statistics(films);
-      }
-
-      default: return false;
-
-    }
-
-  };
-
+  }
 }
+
+setFilter();
+
 mainContainer.appendChild(statistics(films));
 
-const menuItems = document.querySelectorAll(`.main-navigation__item`);
+function setStats() {
+  const menuItems = document.querySelectorAll(`.main-navigation__item`);
 
-for (let item of menuItems) {
-  item.addEventListener(`click`, function () {
-    const statisticsContainer = document.querySelector(`.statistic`);
-    if (item.classList.contains(`js-stats`)) {
-      getChart(films);
-      statisticsContainer.classList.remove(`visually-hidden`);
-      filmsWrapper.classList.add(`visually-hidden`);
-    } else {
-      statisticsContainer.classList.add(`visually-hidden`);
-      filmsWrapper.classList.remove(`visually-hidden`);
-    }
+  for (let item of menuItems) {
+    item.addEventListener(`click`, function () {
+      const statisticsContainer = document.querySelector(`.statistic`);
+      if (item.classList.contains(`js-stats`)) {
+        getChart(films);
+        statisticsContainer.classList.remove(`visually-hidden`);
+        filmsWrapper.classList.add(`visually-hidden`);
+      } else {
+        statisticsContainer.classList.add(`visually-hidden`);
+        filmsWrapper.classList.remove(`visually-hidden`);
+      }
 
-  });
+    });
+  }
 }
+setStats();
 
 const renderFilms = (dist, filmsInner) => {
   dist.innerHTML = ``;
@@ -82,11 +92,21 @@ const renderFilms = (dist, filmsInner) => {
     };
 
     filmComponent.onAddToWatchList = () => {
-      popup._isWatchList = !popup._isWatchList;
+      film.isWatchList = !film.isWatchList;
+      popup.render();
+      popup.update(film);
+      filmComponent.update(film);
+      setFilter();
+      setStats();
     };
 
     filmComponent.onMarkAsWatched = () => {
-      popup._isWatched = !popup._isWatched;
+      film.isWatched = !film.isWatched;
+      popup.render();
+      popup.update(film);
+      filmComponent.update(film);
+      setFilter();
+      setStats();
     };
 
     popup.onClick = () => {

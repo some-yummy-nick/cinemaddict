@@ -3,13 +3,14 @@ import moment from 'moment';
 import 'moment-duration-format';
 
 export default function statistics(films) {
-  const watched = films.filter((item)=>{
+
+  const watched = films.filter((item) => {
     return item.isWatched;
   }).length;
 
   const reducer = (accumulator, currentValue) => accumulator + currentValue;
 
-  const duration = films.map((item)=>{
+  const duration = films.map((item) => {
     return item.duration;
   });
 
@@ -25,6 +26,7 @@ export default function statistics(films) {
 
   const popularGenre = Object.keys(getGenres(films))[num];
   const newElement = document.createElement(`div`);
+
   newElement.innerHTML = `
 <section class="statistic  visually-hidden">
   <p class="statistic__rank">Your rank <span class="statistic__rank-label">${popularGenre}-Fighter</span></p>
@@ -51,7 +53,7 @@ export default function statistics(films) {
   <ul class="statistic__text-list">
     <li class="statistic__text-item">
       <h4 class="statistic__item-title">You watched</h4>
-      <p class="statistic__item-text">${watched} <span class="statistic__item-description">movies</span></p>
+      <p class="statistic__item-text js-watched">${watched} <span class="statistic__item-description">movies</span></p>
     </li>
     <li class="statistic__text-item">
       <h4 class="statistic__item-title">Total duration</h4>
@@ -69,6 +71,10 @@ export default function statistics(films) {
 
 </section>
 `.trim();
+
+  if (document.querySelector(`.js-watched`)) {
+    document.querySelector(`.js-watched`).textContent = watched;
+  }
 
   return newElement.firstChild;
 }
