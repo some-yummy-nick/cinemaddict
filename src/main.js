@@ -3,19 +3,23 @@ import Film from './film';
 import Filter from './filter';
 import Popup from './popup';
 import {getRandomInRange} from './utils';
+import statistics from './statistics';
+import getChart from "./my-chart";
 
 const doc = document;
 
+const mainContainer = doc.querySelector(`.main`);
+const filmsWrapper = document.querySelector(`.films`);
 const filmsContainer = doc.querySelector(`.films .films-list__container`);
 const filtersContainer = doc.querySelector(`.main-navigation`);
-const filmsTop = document.querySelectorAll(`.films-list--extra .films-list__container`);
+const filmsTop = doc.querySelectorAll(`.films-list--extra .films-list__container`);
+const films = filmCommon(7);
 
-const filtersArray = [`all`, `watchlist`, `history`];
+const filtersArray = [`all`, `watchlist`, `history`, `stats`];
 
 for (let name of filtersArray) {
   const filter = new Filter({title: `${name}`});
   filtersContainer.appendChild(filter.render());
-  const films = filmCommon(7);
 
   filter.onFilter = (filterName) => {
     switch (filterName) {
@@ -32,20 +36,41 @@ for (let name of filtersArray) {
         return renderFilms(filmsContainer, newArr);
       }
 
-      default:
-        return false;
+      case `stats`: {
+        return statistics(films);
+      }
+
+      default: return false;
+
     }
 
   };
 
 }
+mainContainer.appendChild(statistics(films));
 
+const menuItems = document.querySelectorAll(`.main-navigation__item`);
 
-const renderFilms = (dist, films) => {
+for (let item of menuItems) {
+  item.addEventListener(`click`, function () {
+    const statisticsContainer = document.querySelector(`.statistic`);
+    if (item.classList.contains(`js-stats`)) {
+      getChart(films);
+      statisticsContainer.classList.remove(`visually-hidden`);
+      filmsWrapper.classList.add(`visually-hidden`);
+    } else {
+      statisticsContainer.classList.add(`visually-hidden`);
+      filmsWrapper.classList.remove(`visually-hidden`);
+    }
+
+  });
+}
+
+const renderFilms = (dist, filmsInner) => {
   dist.innerHTML = ``;
 
-  for (let i = 0; i < films.length; i++) {
-    const film = films[i];
+  for (let i = 0; i < filmsInner.length; i++) {
+    const film = filmsInner[i];
     const filmComponent = new Film(film);
     const popup = new Popup(film);
 

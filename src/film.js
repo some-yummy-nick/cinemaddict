@@ -1,5 +1,6 @@
 import Component from './component';
-const moment = require(`moment`);
+import moment from 'moment';
+import 'moment-duration-format';
 
 export default class Film extends Component {
   constructor(data) {
@@ -59,7 +60,7 @@ export default class Film extends Component {
 
           <p class="film-card__info">
             <span class="film-card__year">${moment(this._date).format(`YYYY`)}</span>
-            <span class="film-card__duration">1h&nbsp;${this._duration.getMinutes() ? `${Number(moment(this._duration).format(`mm`))}m` : ``}</span>
+            <span class="film-card__duration">${moment.duration(this._duration, `minutes`).format(`h[h] mm[m]`)}</span>
               <span class="film-card__genre">${this._genre}</span>
             </p>
   
