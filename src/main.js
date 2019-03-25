@@ -1,32 +1,86 @@
-import makeFilter from './make-filter';
+import filmCommon from './film-common';
 import Film from './film';
-import getFilm from './getFilm';
+import Filter from './filter';
 import Popup from './popup';
+import {getRandomInRange} from './utils';
+import statistics from './statistics';
+import getChart from "./my-chart";
 
 const doc = document;
 
-const getRandomInRange = (min = 1, max = 100) => {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-};
+const mainContainer = doc.querySelector(`.main`);
+const filmsWrapper = document.querySelector(`.films`);
+const filmsContainer = doc.querySelector(`.films .films-list__container`);
+const filtersContainer = doc.querySelector(`.main-navigation`);
+const filmsTop = doc.querySelectorAll(`.films-list--extra .films-list__container`);
+const films = filmCommon(7);
 
-const filter = `
- ${makeFilter(`all`, null, `active`)}
- ${makeFilter(`watchlist`, getRandomInRange())}
- ${makeFilter(`history`, getRandomInRange())} 
- ${makeFilter(`favorites`, getRandomInRange())}
- ${makeFilter(`stats`, null, `additional`)}
- `;
+const filtersArray = [`all`, `watchlist`, `history`, `stats`];
 
-const filters = doc.querySelector(`.main-navigation`);
+function setFilter() {
+  filtersContainer.innerHTML = ``;
 
-filters.insertAdjacentHTML(`afterBegin`, filter);
+  for (let name of filtersArray) {
+    const filter = new Filter({title: `${name}`});
+    filtersContainer.appendChild(filter.render());
 
-const filmsContainer = document.querySelector(`.films .films-list__container`);
-const filmsTop = document.querySelectorAll(`.films-list--extra .films-list__container`);
+    filter.onFilter = (filterName) => {
+      switch (filterName) {
+        case `all`:
+          return renderFilms(filmsContainer, films);
 
-const renderFilms = (dist, number) => {
-  for (let i = 0; i < number; i++) {
-    const film = getFilm();
+        case `watchlist`: {
+          const newArr = films.filter((it) => it.isWatchList);
+          return renderFilms(filmsContainer, newArr);
+        }
+
+        case `history`: {
+          const newArr = films.filter((it) => it.isWatched);
+          return renderFilms(filmsContainer, newArr);
+        }
+
+        case `stats`: {
+          return statistics(films);
+        }
+
+        default:
+          return false;
+      }
+
+    };
+
+  }
+}
+
+setFilter();
+
+mainContainer.appendChild(statistics(films));
+
+function setStats() {
+  const menuItems = document.querySelectorAll(`.main-navigation__item`);
+
+  for (let item of menuItems) {
+    item.addEventListener(`click`, function () {
+      const statisticsContainer = document.querySelector(`.statistic`);
+      if (item.classList.contains(`js-stats`)) {
+        getChart(films);
+        statisticsContainer.classList.remove(`visually-hidden`);
+        filmsWrapper.classList.add(`visually-hidden`);
+      } else {
+        statisticsContainer.classList.add(`visually-hidden`);
+        filmsWrapper.classList.remove(`visually-hidden`);
+      }
+
+    });
+  }
+}
+setStats();
+
+const renderFilms = (dist, filmsInner) => {
+  dist.innerHTML = ``;
+
+  for (let i = 0; i < filmsInner.length; i++) {
+    const film = filmsInner[i];
     const filmComponent = new Film(film);
     const popup = new Popup(film);
 
@@ -35,6 +89,24 @@ const renderFilms = (dist, number) => {
     filmComponent.onClick = () => {
       popup.render();
       doc.querySelector(`body`).append(popup.element);
+    };
+
+    filmComponent.onAddToWatchList = () => {
+      film.isWatchList = !film.isWatchList;
+      popup.render();
+      popup.update(film);
+      filmComponent.update(film);
+      setFilter();
+      setStats();
+    };
+
+    filmComponent.onMarkAsWatched = () => {
+      film.isWatched = !film.isWatched;
+      popup.render();
+      popup.update(film);
+      filmComponent.update(film);
+      setFilter();
+      setStats();
     };
 
     popup.onClick = () => {
@@ -57,25 +129,10 @@ const renderFilms = (dist, number) => {
   }
 };
 
-renderFilms(filmsContainer, 7);
+renderFilms(filmsContainer, filmCommon(7));
 
 for (let block of filmsTop) {
-  renderFilms(block, 7);
-}
-
-const filterItems = doc.querySelectorAll(`.main-navigation__item`);
-
-for (let filterItem of filterItems) {
-  filterItem.addEventListener(`click`, () => {
-    const randomNumber = getRandomInRange(1, 10);
-    filmsContainer.innerHTML = ``;
-    renderFilms(filmsContainer, randomNumber);
-    for (let block of filmsTop) {
-      block.innerHTML = ``;
-      const anotherRandomNumber = getRandomInRange(1, 5);
-      renderFilms(block, anotherRandomNumber);
-    }
-  });
+  renderFilms(block, filmCommon(getRandomInRange(1, 5)));
 }
 
 

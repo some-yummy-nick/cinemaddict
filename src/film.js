@@ -1,5 +1,6 @@
 import Component from './component';
-const moment = require(`moment`);
+import moment from 'moment';
+import 'moment-duration-format';
 
 export default class Film extends Component {
   constructor(data) {
@@ -12,12 +13,20 @@ export default class Film extends Component {
     this._genre = data.genre;
     this._description = data.description;
     this._comments = data.comments;
+    this._isWatched = data.isWatched;
+    this._isWatchList = data.isWatchList;
     this._onClick = null;
+    this._onAddToWatchList = null;
+    this._onMarkAsWatched = null;
     this._onCommentsButtonClick = this._onCommentsButtonClick.bind(this);
+    this._onWatchlistButtonClick = this._onWatchlistButtonClick.bind(this);
+    this._onWatchedButtonClick = this._onWatchedButtonClick.bind(this);
   }
 
   update(data) {
     this._comments = data.comments;
+    this._isWatched = data.isWatched;
+    this._isWatchList = data.isWatchList;
     this.element.querySelector(`.film-card__comments`).textContent = `${this._comments.length} comments`;
   }
 
@@ -25,8 +34,26 @@ export default class Film extends Component {
     return typeof this._onClick === `function` && this._onClick();
   }
 
+  _onWatchlistButtonClick(evt) {
+    evt.preventDefault();
+    return typeof this._onAddToWatchList === `function` && this._onAddToWatchList();
+  }
+
+  _onWatchedButtonClick(evt) {
+    evt.preventDefault();
+    return typeof this._onMarkAsWatched === `function` && this._onMarkAsWatched();
+  }
+
   set onClick(fn) {
     this._onClick = fn;
+  }
+
+  set onAddToWatchList(fn) {
+    this._onAddToWatchList = fn;
+  }
+
+  set onMarkAsWatched(fn) {
+    this._onMarkAsWatched = fn;
   }
 
   get template() {
@@ -37,7 +64,7 @@ export default class Film extends Component {
 
           <p class="film-card__info">
             <span class="film-card__year">${moment(this._date).format(`YYYY`)}</span>
-            <span class="film-card__duration">1h&nbsp;${this._duration.getMinutes() ? `${Number(moment(this._duration).format(`mm`))}m` : ``}</span>
+            <span class="film-card__duration">${moment.duration(this._duration, `minutes`).format(`h[h] mm[m]`)}</span>
               <span class="film-card__genre">${this._genre}</span>
             </p>
   
@@ -56,9 +83,17 @@ export default class Film extends Component {
   bind() {
     this._element.querySelector(`.film-card__comments`)
       .addEventListener(`click`, this._onCommentsButtonClick);
+    this._element.querySelector(`.film-card__controls-item--add-to-watchlist`)
+      .addEventListener(`click`, this._onWatchlistButtonClick);
+    this._element.querySelector(`.film-card__controls-item--mark-as-watched`)
+      .addEventListener(`click`, this._onWatchedButtonClick);
   }
   unbind() {
     this._element.querySelector(`.film-card__comments`)
       .removeEventListener(`click`, this._onCommentsButtonClick);
+    this._element.querySelector(`.film-card__controls-item--add-to-watchlist`)
+      .removeEventListener(`click`, this._onWatchlistButtonClick);
+    this._element.querySelector(`.film-card__controls-item--mark-as-watched`)
+      .removeEventListener(`click`, this._onWatchedButtonClick);
   }
 }

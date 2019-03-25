@@ -21,6 +21,8 @@ export default class Popup extends Component {
     this._description = data.description;
     this._duration = data.duration;
     this._isFavorite = data.isFavorite;
+    this._isWatched = data.isWatched;
+    this._isWatchList = data.isWatchList;
     this._comments = data.comments;
     this._onClick = null;
     this._onSetComment = null;
@@ -34,6 +36,8 @@ export default class Popup extends Component {
   update(data) {
     this._comments = data.comments;
     this._score = data.score;
+    this._isWatched = data.isWatched;
+    this._isWatchList = data.isWatchList;
     this.element.querySelector(`.film-details__comments-list`).innerHTML = Popup._onAddComment(this._comments);
     this.element.querySelector(`.film-details__comment-input`).value = ``;
     this.element.querySelector(`.film-details__user-rating`).textContent = `Your rate ${this._score}`;
@@ -191,13 +195,13 @@ export default class Popup extends Component {
     </div>
 
     <section class="film-details__controls">
-      <input type="checkbox" class="film-details__control-input visually-hidden" id="watchlist" name="watchlist">
-      <label for="watchlist" class="film-details__control-label film-details__control-label--watchlist">Add to watchlist</label>
-
-      <input type="checkbox" class="film-details__control-input visually-hidden" id="watched" name="watched" checked>
-      <label for="watched" class="film-details__control-label film-details__control-label--watched">Already watched</label>
-
-      <input type="checkbox" class="film-details__control-input visually-hidden" id="favorite" name="favorite" ${this._isFavorite ? `checked` : ``}>
+      <input type="checkbox" class="film-details__control-input visually-hidden" id="watchlist" name="watchlist" ${this._isWatchList ? `checked` : ``}>
+        <label for="watchlist" class="film-details__control-label film-details__control-label--watchlist">Add to watchlist</label>
+  
+        <input type="checkbox" class="film-details__control-input visually-hidden" id="watched" name="watched" ${this._isWatched ? `checked` : ``}>
+        <label for="watched" class="film-details__control-label film-details__control-label--watched">Already watched</label>
+  
+        <input type="checkbox" class="film-details__control-input visually-hidden" id="favorite" name="favorite" ${this._isFavorite ? `checked` : ``}>
       <label for="favorite" class="film-details__control-label film-details__control-label--favorite">Add to favorites</label>
     </section>
 
