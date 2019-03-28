@@ -1,4 +1,4 @@
-import {getGenres} from "./my-chart";
+import {getMax} from "./my-chart";
 import moment from 'moment';
 import 'moment-duration-format';
 
@@ -15,21 +15,12 @@ export default function statistics(films) {
   });
 
   const totalDuration = duration.reduce(reducer);
-
-  const genresNumbers = Object.values(getGenres(films));
-  let num = 0;
-  for (let i = 0; i < genresNumbers.length; ++i) {
-    if (genresNumbers[i] > genresNumbers[i + 1]) {
-      num = i;
-    }
-  }
-
-  const popularGenre = Object.keys(getGenres(films))[num];
+  const popularGenre = getMax(films);
   const newElement = document.createElement(`div`);
 
   newElement.innerHTML = `
 <section class="statistic  visually-hidden">
-  <p class="statistic__rank">Your rank <span class="statistic__rank-label">${popularGenre}-Fighter</span></p>
+  <p class="statistic__rank">Your rank <span class="statistic__rank-label">${popularGenre.genre}-Fighter</span></p>
 
   <form action="https://echo.htmlacademy.ru/" method="get" class="statistic__filters visually-hidden">
     <p class="statistic__filters-description">Show stats:</p>
@@ -61,7 +52,7 @@ export default function statistics(films) {
     </li>
     <li class="statistic__text-item">
       <h4 class="statistic__item-title">Top genre</h4>
-      <p class="statistic__item-text">${popularGenre}</p>
+      <p class="statistic__item-text">${popularGenre.genre}</p>
     </li>
   </ul>
 

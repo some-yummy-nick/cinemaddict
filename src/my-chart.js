@@ -17,6 +17,41 @@ export function getGenres(films) {
   }, {});
 }
 
+export function getMax(films) {
+  const result = {};
+  let genreArr = [];
+
+  films.map((item)=>{
+    genreArr.push(item.genre);
+  });
+  genreArr = genreArr.join().split(`,`);
+  for (let i = 0; i < genreArr.length; ++i) {
+    let a = genreArr[i];
+    if (result[a] !== undefined) {
+      ++result[a];
+    } else {
+      result[a] = 1;
+    }
+  }
+
+  let maxGenre = {
+    number: 0,
+    genre: ``
+  };
+
+  for (let key in result) {
+
+    if (result.hasOwnProperty(key)) {
+      if (key !== `` && result[key] > maxGenre.number) {
+
+        maxGenre.number = result[key];
+        maxGenre.genre = key;
+      }
+    }
+  }
+  return maxGenre;
+}
+
 export default function getChart(films) {
   const statisticCtx = document.querySelector(`.statistic__chart`);
   const BAR_HEIGHT = 50;
