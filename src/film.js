@@ -6,7 +6,7 @@ export default class Film extends Component {
   constructor(data) {
     super();
     this._title = data.title;
-    this._rating = data.rating;
+    this._totalRating = data.totalRating;
     this._poster = data.poster;
     this._date = data.date;
     this._duration = data.duration;
@@ -15,12 +15,15 @@ export default class Film extends Component {
     this._comments = data.comments;
     this._isWatched = data.isWatched;
     this._isWatchList = data.isWatchList;
+    this._isFavorite = data.isFavorite;
     this._onClick = null;
     this._onAddToWatchList = null;
-    this._onMarkAsWatched = null;
+    this._onAddToWatchedList = null;
+    this._onSetFavorite = null;
     this._onCommentsButtonClick = this._onCommentsButtonClick.bind(this);
     this._onWatchlistButtonClick = this._onWatchlistButtonClick.bind(this);
     this._onWatchedButtonClick = this._onWatchedButtonClick.bind(this);
+    this._onFavoriteClick = this._onFavoriteClick.bind(this);
   }
 
   update(data) {
@@ -34,6 +37,11 @@ export default class Film extends Component {
     return typeof this._onClick === `function` && this._onClick();
   }
 
+  _onFavoriteClick(evt) {
+    evt.preventDefault();
+    return typeof this._onSetFavorite === `function` && this._onSetFavorite();
+  }
+
   _onWatchlistButtonClick(evt) {
     evt.preventDefault();
     return typeof this._onAddToWatchList === `function` && this._onAddToWatchList();
@@ -41,34 +49,38 @@ export default class Film extends Component {
 
   _onWatchedButtonClick(evt) {
     evt.preventDefault();
-    return typeof this._onMarkAsWatched === `function` && this._onMarkAsWatched();
+    return typeof this._onAddToWatchedList === `function` && this._onAddToWatchedList();
   }
 
   set onClick(fn) {
     this._onClick = fn;
   }
 
+  set onSetFavorite(fn) {
+    this._onSetFavorite = fn;
+  }
+
   set onAddToWatchList(fn) {
     this._onAddToWatchList = fn;
   }
 
-  set onMarkAsWatched(fn) {
-    this._onMarkAsWatched = fn;
+  set onAddToWatchedList(fn) {
+    this._onAddToWatchedList = fn;
   }
 
   get template() {
     return `
     <article class="film-card">
           <h3 class="film-card__title">${this._title}</h3>
-          <p class="film-card__rating">${this._rating}</p>
+          <p class="film-card__rating">${this._totalRating}</p>
 
           <p class="film-card__info">
             <span class="film-card__year">${moment(this._date).format(`YYYY`)}</span>
             <span class="film-card__duration">${moment.duration(this._duration, `minutes`).format(`h[h] mm[m]`)}</span>
-              <span class="film-card__genre">${this._genre}</span>
+             ${this._genre.join() !== `` ? `
+             <span class="film-card__genre">${this._genre.map((item) => ` ` + item)}</span>` : ``}
             </p>
-  
-            <img src="./images/posters/${this._poster}.jpg" alt="" class="film-card__poster">
+            <img src="${this._poster}" alt="" class="film-card__poster">
             <p class="film-card__description">${this._description}</p>
             <button class="film-card__comments">${this._comments.length ? `${this._comments.length} comments` : ``} </button> 
            <form class="film-card__controls">
@@ -87,6 +99,8 @@ export default class Film extends Component {
       .addEventListener(`click`, this._onWatchlistButtonClick);
     this._element.querySelector(`.film-card__controls-item--mark-as-watched`)
       .addEventListener(`click`, this._onWatchedButtonClick);
+    this._element.querySelector(`.film-card__controls-item--favorite`)
+      .addEventListener(`click`, this._onFavoriteClick);
   }
   unbind() {
     this._element.querySelector(`.film-card__comments`)
@@ -95,5 +109,7 @@ export default class Film extends Component {
       .removeEventListener(`click`, this._onWatchlistButtonClick);
     this._element.querySelector(`.film-card__controls-item--mark-as-watched`)
       .removeEventListener(`click`, this._onWatchedButtonClick);
+    this._element.querySelector(`.film-card__controls-item--favorite`)
+      .removeEventListener(`click`, this._onFavoriteClick);
   }
 }
