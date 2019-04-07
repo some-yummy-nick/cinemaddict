@@ -1,5 +1,6 @@
 import Film from './film';
 import Filter from './filter';
+import Search from './search';
 import Popup from './popup';
 import statistics from './statistics';
 import getChart from "./my-chart";
@@ -10,18 +11,29 @@ const mainContainer = doc.querySelector(`.main`);
 const filmsWrapper = document.querySelector(`.films`);
 const filmsContainer = doc.querySelector(`.films .films-list__container`);
 const filtersContainer = doc.querySelector(`.main-navigation`);
+const headerLogo = doc.querySelector(`.header__logo.logo`);
 const AUTHORIZATION = `Basic A8XoP3pLaHAAh2kt=`;
 const END_POINT = ` https://es8-demo-srv.appspot.com/moowle`;
 const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
 const filtersArray = [`all`, `watchlist`, `history`, `stats`];
 
 let filmFromServer;
+
 filmsContainer.textContent = `Loading movies...`;
 api.getFilms()
   .then((films) => {
     filmFromServer = films;
     renderFilms(filmsContainer, films);
     mainContainer.appendChild(statistics(filmFromServer));
+    const search = new Search(films);
+    search.render();
+    headerLogo.insertAdjacentElement(`afterend`, search.element);
+    search.onChange = (value) => {
+      const newArr = films.filter((item) => {
+        return item.title.toLowerCase().includes(value);
+      });
+      renderFilms(filmsContainer, newArr);
+    };
   })
   .catch(() => {
     filmsContainer.textContent = `Something went wrong while loading your tasks. Check your connection or try again later`;
@@ -61,6 +73,7 @@ function setFilter() {
 
   }
 }
+
 setFilter();
 
 
@@ -82,6 +95,7 @@ function setStats() {
     });
   }
 }
+
 setStats();
 
 const renderFilms = (dist, filmsInner) => {
@@ -185,6 +199,8 @@ const renderFilms = (dist, filmsInner) => {
       film.comments.push(formdata.comments);
       block();
       popup.element.querySelector(`.film-details__inner`).classList.remove(`shake`, `error`);
+      popup.element.querySelector(`.film-details__watched-status`).textContent = `Comment added`;
+      popup.element.querySelector(`.film-details__watched-reset`).removeAttribute(`hidden`);
 
       api.updateFilm({id: film.id, data: film.toRAW()})
         .then((newFilm) => {
@@ -193,7 +209,26 @@ const renderFilms = (dist, filmsInner) => {
           filmComponent.update(newFilm);
           filmComponent.render();
         })
-        .catch(()=>{
+        .catch(() => {
+          popup.element.querySelector(`.film-details__inner`).classList.add(`shake`, `error`);
+          unblock();
+        });
+    };
+
+    popup.onCommentDelete = () => {
+      film.comments.pop();
+      block();
+      popup.element.querySelector(`.film-details__inner`).classList.remove(`shake`, `error`);
+      popup.element.querySelector(`.film-details__watched-status`).textContent = `Comment deleted`;
+      popup.element.querySelector(`.film-details__watched-reset`).setAttribute(`hidden`, `true`);
+      api.updateFilm({id: film.id, data: film.toRAW()})
+        .then((newFilm) => {
+          unblock();
+          popup.update(newFilm);
+          filmComponent.update(newFilm);
+          filmComponent.render();
+        })
+        .catch(() => {
           popup.element.querySelector(`.film-details__inner`).classList.add(`shake`, `error`);
           unblock();
         });
@@ -213,7 +248,7 @@ const renderFilms = (dist, filmsInner) => {
           filmComponent.update(newFilm);
           filmComponent.render();
         })
-        .catch(()=>{
+        .catch(() => {
           popup.element.querySelector(`.film-details__inner`).classList.add(`shake`);
           popup.element.querySelector(`#rating-${film.personalRating}`).nextElementSibling.classList.add(`error`);
           unblock();
@@ -225,5 +260,4 @@ const renderFilms = (dist, filmsInner) => {
     };
   }
 };
-
 
