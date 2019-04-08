@@ -12,7 +12,7 @@ const filmsWrapper = document.querySelector(`.films`);
 const filmsContainer = doc.querySelector(`.films .films-list__container`);
 const filtersContainer = doc.querySelector(`.main-navigation`);
 const headerLogo = doc.querySelector(`.header__logo.logo`);
-const AUTHORIZATION = `Basic A8XoP3pLaHAAh2kt=`;
+const AUTHORIZATION = `Basic A8XiP3pLaHAAj2kt=`;
 const END_POINT = ` https://es8-demo-srv.appspot.com/moowle`;
 const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
 const filtersArray = [`all`, `watchlist`, `history`, `stats`];
@@ -20,11 +20,12 @@ const filtersArray = [`all`, `watchlist`, `history`, `stats`];
 let filmFromServer;
 
 filmsContainer.textContent = `Loading movies...`;
+
 api.getFilms()
   .then((films) => {
     filmFromServer = films;
     renderFilms(filmsContainer, films);
-    mainContainer.appendChild(statistics(filmFromServer));
+    mainContainer.appendChild(statistics(films));
     const search = new Search(films);
     search.render();
     headerLogo.insertAdjacentElement(`afterend`, search.element);
@@ -38,6 +39,29 @@ api.getFilms()
   .catch(() => {
     filmsContainer.textContent = `Something went wrong while loading your tasks. Check your connection or try again later`;
   });
+
+function setTitle() {
+
+  api.getFilms()
+    .then((films) => {
+      const watchedNumber = films.filter((item) => {
+        return item.isWatched;
+      });
+
+      if (watchedNumber.length <= 10 && watchedNumber.length >= 1) {
+        doc.querySelector(`.profile__rating`).textContent = `novice`;
+      }
+
+      if (watchedNumber.length <= 20 && watchedNumber.length >= 11) {
+        doc.querySelector(`.profile__rating`).textContent = `fan`;
+      }
+
+      if (watchedNumber.length >= 21) {
+        doc.querySelector(`.profile__rating`).textContent = `movie buff`;
+      }
+    });
+}
+setTitle();
 
 function setFilter() {
   filtersContainer.innerHTML = ``;
@@ -75,7 +99,6 @@ function setFilter() {
 }
 
 setFilter();
-
 
 function setStats() {
   const menuItems = document.querySelectorAll(`.main-navigation__item`);
@@ -146,18 +169,18 @@ const renderFilms = (dist, filmsInner) => {
           setFilter();
           setStats();
         });
-
+      setTitle();
     };
 
     popup.onAddToWatchedList = () => {
       film.isWatched = !film.isWatched;
-
       api.updateFilm({id: film.id, data: film.toRAW()})
         .then((newFilm) => {
           popup.update(newFilm);
           filmComponent.render();
           filmComponent.update(newFilm);
         });
+      setTitle();
     };
 
     filmComponent.onSetFavorite = () => {
@@ -256,6 +279,10 @@ const renderFilms = (dist, filmsInner) => {
     };
 
     popup.onClick = () => {
+      popup.unrender();
+    };
+
+    popup.onEnd = () => {
       popup.unrender();
     };
   }

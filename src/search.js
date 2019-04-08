@@ -1,7 +1,7 @@
 import Component from "./component";
 
 export default class Search extends Component {
-  constructor(data) {
+  constructor() {
     super();
     this._onChange = null;
     this._onSearchChange = this._onSearchChange.bind(this);

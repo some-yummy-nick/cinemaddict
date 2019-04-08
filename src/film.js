@@ -30,6 +30,7 @@ export default class Film extends Component {
     this._comments = data.comments;
     this._isWatched = data.isWatched;
     this._isWatchList = data.isWatchList;
+    this._isFavorite = data.isFavorite;
     this.element.querySelector(`.film-card__comments`).textContent = `${this._comments.length} comments`;
   }
 

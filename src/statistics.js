@@ -22,7 +22,7 @@ export default function statistics(films) {
 <section class="statistic  visually-hidden">
   <p class="statistic__rank">Your rank <span class="statistic__rank-label">${popularGenre.genre}-Fighter</span></p>
 
-  <form action="https://echo.htmlacademy.ru/" method="get" class="statistic__filters visually-hidden">
+  <form action="https://echo.htmlacademy.ru/" method="get" class="statistic__filters">
     <p class="statistic__filters-description">Show stats:</p>
 
     <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-all-time" value="all-time" checked>
