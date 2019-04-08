@@ -18,6 +18,7 @@ export default class ModelFilm {
     this.isFavorite = Boolean(data[`user_details`][`favorite`]);
     this.isWatchList = Boolean(data[`user_details`][`watchlist`]);
     this.isWatched = Boolean(data[`user_details`][`already_watched`]);
+    this.watchingDate = data[`user_details`][`watching_date`];
   }
 
   toRAW() {
@@ -42,6 +43,7 @@ export default class ModelFilm {
         'personal_rating': this.personalRating,
         'favorite': this.isFavorite,
         'already_watched': this.isWatched,
+        'watching_date': this.watchingDate,
         'watchlist': this.isWatchList,
       }
     };

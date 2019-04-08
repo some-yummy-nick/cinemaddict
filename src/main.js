@@ -5,6 +5,8 @@ import Popup from './popup';
 import statistics from './statistics';
 import getChart from "./my-chart";
 import API from './api';
+import period from "./period";
+import moment from 'moment';
 
 const doc = document;
 const mainContainer = doc.querySelector(`.main`);
@@ -12,7 +14,7 @@ const filmsWrapper = document.querySelector(`.films`);
 const filmsContainer = doc.querySelector(`.films .films-list__container`);
 const filtersContainer = doc.querySelector(`.main-navigation`);
 const headerLogo = doc.querySelector(`.header__logo.logo`);
-const AUTHORIZATION = `Basic A8XiP3pLaHAAj2kt=`;
+const AUTHORIZATION = `Basic A8XiP3pLbHAFj3kt=`;
 const END_POINT = ` https://es8-demo-srv.appspot.com/moowle`;
 const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
 const filtersArray = [`all`, `watchlist`, `history`, `stats`];
@@ -26,6 +28,9 @@ api.getFilms()
     filmFromServer = films;
     renderFilms(filmsContainer, films);
     mainContainer.appendChild(statistics(films));
+    const statisticsRank = doc.querySelector(`.statistic__rank`);
+    statisticsRank.insertAdjacentElement(`afterend`, period());
+
     const search = new Search(films);
     search.render();
     headerLogo.insertAdjacentElement(`afterend`, search.element);
@@ -35,6 +40,7 @@ api.getFilms()
       });
       renderFilms(filmsContainer, newArr);
     };
+    setStats(films);
   })
   .catch(() => {
     filmsContainer.textContent = `Something went wrong while loading your tasks. Check your connection or try again later`;
@@ -61,6 +67,7 @@ function setTitle() {
       }
     });
 }
+
 setTitle();
 
 function setFilter() {
@@ -100,14 +107,14 @@ function setFilter() {
 
 setFilter();
 
-function setStats() {
+function setStats(filmsToStat) {
   const menuItems = document.querySelectorAll(`.main-navigation__item`);
 
   for (let item of menuItems) {
     item.addEventListener(`click`, function () {
       const statisticsContainer = document.querySelector(`.statistic`);
       if (item.classList.contains(`js-stats`)) {
-        getChart(filmFromServer);
+        getChart(filmsToStat);
         statisticsContainer.classList.remove(`visually-hidden`);
         filmsWrapper.classList.add(`visually-hidden`);
       } else {
@@ -118,8 +125,6 @@ function setStats() {
     });
   }
 }
-
-setStats();
 
 const renderFilms = (dist, filmsInner) => {
   dist.innerHTML = ``;
@@ -144,7 +149,10 @@ const renderFilms = (dist, filmsInner) => {
           popup.render();
           popup.update(newFilm);
           setFilter();
-          setStats();
+          api.getFilms()
+            .then((films) => {
+              setStats(films);
+            });
         });
     };
 
@@ -161,19 +169,25 @@ const renderFilms = (dist, filmsInner) => {
 
     filmComponent.onAddToWatchedList = () => {
       film.isWatched = !film.isWatched;
+      film.watchingDate = Date.now();
 
       api.updateFilm({id: film.id, data: film.toRAW()})
         .then((newFilm) => {
           popup.render();
           popup.update(newFilm);
           setFilter();
-          setStats();
+          api.getFilms()
+            .then((films) => {
+              setStats(films);
+            });
         });
       setTitle();
     };
 
     popup.onAddToWatchedList = () => {
       film.isWatched = !film.isWatched;
+      film.watchingDate = Date.now();
+
       api.updateFilm({id: film.id, data: film.toRAW()})
         .then((newFilm) => {
           popup.update(newFilm);
@@ -191,7 +205,10 @@ const renderFilms = (dist, filmsInner) => {
           popup.render();
           popup.update(newFilm);
           setFilter();
-          setStats();
+          api.getFilms()
+            .then((films) => {
+              setStats(films);
+            });
         });
 
     };
@@ -287,4 +304,32 @@ const renderFilms = (dist, filmsInner) => {
     };
   }
 };
+
+doc.addEventListener(`change`, (evt) => {
+  if (evt.target.name === `statistic-filter`) {
+    let newArr = [];
+
+    if (evt.target.value === `all-time`) {
+      newArr = filmFromServer;
+    } else if (evt.target.value === `today`) {
+      newArr = filmFromServer.filter((item) => {
+        return moment(item.watchingDate).isSame(Date.now(), `day`);
+      });
+    } else if (evt.target.value === `week`) {
+      newArr = filmFromServer.filter((item) => {
+        return moment(item.watchingDate).isSame(Date.now(), `week`);
+      });
+    } else if (evt.target.value === `month`) {
+      newArr = filmFromServer.filter((item) => {
+        return moment(item.watchingDate).isSame(Date.now(), `month`);
+      });
+    } else if (evt.target.value === `year`) {
+      newArr = filmFromServer.filter((item) => {
+        return moment(item.watchingDate).isSame(Date.now(), `year`);
+      });
+    }
+    getChart(newArr);
+    setStats(newArr);
+  }
+});
 
