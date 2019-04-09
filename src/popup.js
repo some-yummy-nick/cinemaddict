@@ -30,17 +30,21 @@ export default class Popup extends Component {
     this._isWatchList = data.isWatchList;
     this._comments = data.comments;
     this._onClick = null;
+    this._onEnd = null;
     this._onAddToWatchList = null;
     this._onSetFavorite = null;
     this._onSetComment = null;
+    this._onCommentDelete = null;
     this._onSetRating = null;
     this._onCloseClick = this._onCloseClick.bind(this);
     this._onCommentChange = this._onCommentChange.bind(this);
+    this._onCommentDeleteClick = this._onCommentDeleteClick.bind(this);
     this._onEmojiChange = this._onEmojiChange.bind(this);
     this._onRatingChange = this._onRatingChange.bind(this);
     this._onWatchListChange = this._onWatchListChange.bind(this);
     this._onWatchedChange = this._onWatchedChange.bind(this);
     this._onFavoriteClick = this._onFavoriteClick.bind(this);
+    this._onEndDown = this._onEndDown.bind(this);
   }
 
   update(data) {
@@ -48,6 +52,7 @@ export default class Popup extends Component {
     this._personalRating = data.personalRating;
     this._isWatched = data.isWatched;
     this._isWatchList = data.isWatchList;
+    this._isFavorite = data.isFavorite;
     this.element.querySelector(`.film-details__comments-list`).innerHTML = Popup._onAddComment(this._comments);
     this.element.querySelector(`.film-details__comment-input`).value = ``;
     this.element.querySelector(`.film-details__user-rating`).textContent = `Your rate ${Math.floor(this._personalRating)}`;
@@ -56,6 +61,13 @@ export default class Popup extends Component {
 
   _onCloseClick() {
     return typeof this._onClick === `function` && this._onClick();
+  }
+
+  _onEndDown(evt) {
+    if (evt.keyCode === 27) {
+      return typeof this._onEnd === `function` && this._onEnd();
+    }
+    return false;
   }
 
   _onWatchListChange() {
@@ -80,6 +92,10 @@ export default class Popup extends Component {
       }
     }
 
+  }
+
+  _onCommentDeleteClick() {
+    return typeof this._onCommentDelete === `function` && this._onCommentDelete();
   }
 
   _onEmojiChange(evt) {
@@ -108,7 +124,7 @@ export default class Popup extends Component {
             <p class="film-details__comment-text">${comment.comment}</p>
             <p class="film-details__comment-info">
               <span class="film-details__comment-author">${comment.author}</span>
-              <span class="film-details__comment-day">${new Date().getDate() - new Date(comment.date).getDate()} days ago</span>
+              <span class="film-details__comment-day">${moment(comment.date).fromNow()}</span>
             </p>
           </div>
         </li>` : ``).join(``);
@@ -147,6 +163,10 @@ export default class Popup extends Component {
     this._onClick = fn;
   }
 
+  set onEnd(fn) {
+    this._onEnd = fn;
+  }
+
   set onAddToWatchList(fn) {
     this._onAddToWatchList = fn;
   }
@@ -161,6 +181,9 @@ export default class Popup extends Component {
 
   set onSetComment(fn) {
     this._onSetComment = fn;
+  }
+  set onCommentDelete(fn) {
+    this._onCommentDelete = fn;
   }
 
   set onSetRating(fn) {
@@ -306,8 +329,8 @@ export default class Popup extends Component {
 
     <section class="film-details__user-rating-wrap">
       <div class="film-details__user-rating-controls">
-        <span class="film-details__watched-status film-details__watched-status--active">Already watched</span>
-        <button class="film-details__watched-reset" type="button">undo</button>
+        <span class="film-details__watched-status film-details__watched-status--active"></span>
+        <button class="film-details__watched-reset" hidden type="button">undo</button>
       </div>
 
       <div class="film-details__user-score">
@@ -361,6 +384,9 @@ export default class Popup extends Component {
     this._element.querySelector(`.film-details__close-btn`)
       .addEventListener(`click`, this._onCloseClick);
     document.addEventListener(`keydown`, this._onCommentChange);
+    document.addEventListener(`keydown`, this._onEndDown);
+    this._element.querySelector(`.film-details__watched-reset`)
+      .addEventListener(`click`, this._onCommentDeleteClick);
     this._element.querySelector(`form`)
       .addEventListener(`change`, this._onEmojiChange);
     this._element.querySelector(`form`)
@@ -377,6 +403,10 @@ export default class Popup extends Component {
   unbind() {
     this._element.querySelector(`.film-details__close-btn`)
       .removeEventListener(`click`, this._onCloseClick);
+    document.removeEventListener(`keydown`, this._onCommentChange);
+    document.removeEventListener(`keydown`, this._onEndDown);
+    this._element.querySelector(`.film-details__watched-reset`)
+      .removeEventListener(`click`, this._onCommentDeleteClick);
     this._element.querySelector(`form`)
       .removeEventListener(`change`, this._onEmojiChange);
     this._element.querySelector(`form`)
