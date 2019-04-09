@@ -24,15 +24,15 @@ export default function statistics(films) {
   <ul class="statistic__text-list">
     <li class="statistic__text-item">
       <h4 class="statistic__item-title">You watched</h4>
-      <p class="statistic__item-text js-watched">${watched} <span class="statistic__item-description">movies</span></p>
+      <p class="statistic__item-text"><span class="js-watched">${watched}</span> <span class="statistic__item-description">movies</span></p>
     </li>
     <li class="statistic__text-item">
       <h4 class="statistic__item-title">Total duration</h4>
-      <p class="statistic__item-text">${moment.duration(totalDuration, `minutes`).format(`h[<span class="statistic__item-description">h&nbsp;</span>]mm[<span class="statistic__item-description">m</span>]`)}</p>
+      <p class="statistic__item-text js-duration">${moment.duration(totalDuration, `minutes`).format(`h[<span class="statistic__item-description">h&nbsp;</span>]mm[<span class="statistic__item-description">m</span>]`)}</p>
     </li>
     <li class="statistic__text-item">
       <h4 class="statistic__item-title">Top genre</h4>
-      <p class="statistic__item-text">${popularGenre.genre}</p>
+      <p class="statistic__item-text js-top-genre">${popularGenre.genre}</p>
     </li>
   </ul>
 

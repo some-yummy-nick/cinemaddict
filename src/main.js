@@ -7,6 +7,8 @@ import getChart from "./my-chart";
 import API from './api';
 import period from "./period";
 import moment from 'moment';
+import 'moment-duration-format';
+import {getMax} from "./my-chart";
 
 const doc = document;
 const mainContainer = doc.querySelector(`.main`);
@@ -14,7 +16,7 @@ const filmsWrapper = document.querySelector(`.films`);
 const filmsContainer = doc.querySelector(`.films .films-list__container`);
 const filtersContainer = doc.querySelector(`.main-navigation`);
 const headerLogo = doc.querySelector(`.header__logo.logo`);
-const AUTHORIZATION = `Basic A8XiP3pLbHAFj3kt=`;
+const AUTHORIZATION = `Basic A8XiP3pLcHAFj3kt=`;
 const END_POINT = ` https://es8-demo-srv.appspot.com/moowle`;
 const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
 const filtersArray = [`all`, `watchlist`, `history`, `stats`];
@@ -124,6 +126,28 @@ function setStats(filmsToStat) {
 
     });
   }
+}
+
+function updateStats(films) {
+  const rank = doc.querySelector(`.statistic__rank-label`);
+  const watched = doc.querySelector(`.js-watched`);
+  const topGenre = doc.querySelector(`.js-top-genre`);
+  const totalDurationNumber = doc.querySelector(`.js-duration`);
+  const popularGenre = getMax(films);
+  const watchedNumber = films.filter((item) => {
+    return item.isWatched;
+  }).length;
+  const reducer = (accumulator, currentValue) => accumulator + currentValue;
+
+  const duration = films.map((item) => {
+    return item.duration;
+  });
+
+  const totalDuration = duration.reduce(reducer);
+  rank.textContent = `${popularGenre.genre}-Fighter`;
+  watched.textContent = watchedNumber;
+  topGenre.textContent = popularGenre.genre;
+  totalDurationNumber.innerHTML = `${moment.duration(totalDuration, `minutes`).format(`h[<span class="statistic__item-description">h&nbsp;</span>]mm[<span class="statistic__item-description">m</span>]`)}`;
 }
 
 const renderFilms = (dist, filmsInner) => {
@@ -329,7 +353,7 @@ doc.addEventListener(`change`, (evt) => {
       });
     }
     getChart(newArr);
-    setStats(newArr);
+    updateStats(newArr);
   }
 });
 
