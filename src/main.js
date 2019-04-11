@@ -10,16 +10,19 @@ import moment from 'moment';
 import 'moment-duration-format';
 import {getMax} from "./my-chart";
 
-const doc = document;
-const mainContainer = doc.querySelector(`.main`);
+const mainContainer = document.querySelector(`.main`);
 const filmsWrapper = document.querySelector(`.films`);
-const filmsContainer = doc.querySelector(`.films .films-list__container`);
-const filtersContainer = doc.querySelector(`.main-navigation`);
-const headerLogo = doc.querySelector(`.header__logo.logo`);
+const filmsContainer = document.querySelector(`.films .films-list__container`);
+const filtersContainer = document.querySelector(`.main-navigation`);
+const headerLogo = document.querySelector(`.header__logo.logo`);
 const AUTHORIZATION = `Basic A8XiP3pLcHAFj3kt=`;
 const END_POINT = ` https://es8-demo-srv.appspot.com/moowle`;
 const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
 const filtersArray = [`all`, `watchlist`, `history`, `stats`];
+
+const RATINGS_NOVICE = 10;
+const RATINGS_FAN = 20;
+const RATINGS_MORE_BUFF = 21;
 
 let filmFromServer;
 
@@ -29,8 +32,9 @@ api.getFilms()
   .then((films) => {
     filmFromServer = films;
     renderFilms(filmsContainer, films);
-    mainContainer.appendChild(statistics(films));
-    const statisticsRank = doc.querySelector(`.statistic__rank`);
+    const arrWatched = filmFromServer.filter((it) => it.isWatched);
+    mainContainer.appendChild(statistics(arrWatched));
+    const statisticsRank = document.querySelector(`.statistic__rank`);
     statisticsRank.insertAdjacentElement(`afterend`, period());
 
     const search = new Search(films);
@@ -56,16 +60,16 @@ function setTitle() {
         return item.isWatched;
       });
 
-      if (watchedNumber.length <= 10 && watchedNumber.length >= 1) {
-        doc.querySelector(`.profile__rating`).textContent = `novice`;
+      if (watchedNumber.length <= RATINGS_NOVICE && watchedNumber.length >= 1) {
+        document.querySelector(`.profile__rating`).textContent = `novice`;
       }
 
-      if (watchedNumber.length <= 20 && watchedNumber.length >= 11) {
-        doc.querySelector(`.profile__rating`).textContent = `fan`;
+      if (watchedNumber.length <= RATINGS_FAN && watchedNumber.length > RATINGS_NOVICE) {
+        document.querySelector(`.profile__rating`).textContent = `fan`;
       }
 
-      if (watchedNumber.length >= 21) {
-        doc.querySelector(`.profile__rating`).textContent = `movie buff`;
+      if (watchedNumber.length >= RATINGS_MORE_BUFF) {
+        document.querySelector(`.profile__rating`).textContent = `movie buff`;
       }
     });
 }
@@ -95,7 +99,9 @@ function setFilter() {
         }
 
         case `stats`: {
-          return statistics(filmFromServer);
+          const newArr = filmFromServer.filter((it) => it.isWatched);
+
+          return statistics(newArr);
         }
 
         default:
@@ -128,18 +134,19 @@ function setStats(filmsToStat) {
   }
 }
 
-function updateStats(films) {
-  const rank = doc.querySelector(`.statistic__rank-label`);
-  const watched = doc.querySelector(`.js-watched`);
-  const topGenre = doc.querySelector(`.js-top-genre`);
-  const totalDurationNumber = doc.querySelector(`.js-duration`);
-  const popularGenre = getMax(films);
-  const watchedNumber = films.filter((item) => {
+function updateStats(newFilms) {
+  const arrWatched = newFilms.filter((it) => it.isWatched);
+  const rank = document.querySelector(`.statistic__rank-label`);
+  const watched = document.querySelector(`.js-watched`);
+  const topGenre = document.querySelector(`.js-top-genre`);
+  const totalDurationNumber = document.querySelector(`.js-duration`);
+  const popularGenre = getMax(arrWatched);
+  const watchedNumber = arrWatched.filter((item) => {
     return item.isWatched;
   }).length;
   const reducer = (accumulator, currentValue) => accumulator + currentValue;
 
-  const duration = films.map((item) => {
+  const duration = arrWatched.map((item) => {
     return item.duration;
   });
 
@@ -162,7 +169,7 @@ const renderFilms = (dist, filmsInner) => {
 
     filmComponent.onClick = () => {
       popup.render();
-      doc.querySelector(`body`).append(popup.element);
+      document.querySelector(`body`).append(popup.element);
     };
 
     filmComponent.onAddToWatchList = () => {
@@ -176,6 +183,7 @@ const renderFilms = (dist, filmsInner) => {
           api.getFilms()
             .then((films) => {
               setStats(films);
+              updateStats(films);
             });
         });
     };
@@ -203,6 +211,7 @@ const renderFilms = (dist, filmsInner) => {
           api.getFilms()
             .then((films) => {
               setStats(films);
+              updateStats(films);
             });
         });
       setTitle();
@@ -217,6 +226,11 @@ const renderFilms = (dist, filmsInner) => {
           popup.update(newFilm);
           filmComponent.render();
           filmComponent.update(newFilm);
+          api.getFilms()
+            .then((films) => {
+              setStats(films);
+              updateStats(films);
+            });
         });
       setTitle();
     };
@@ -232,6 +246,7 @@ const renderFilms = (dist, filmsInner) => {
           api.getFilms()
             .then((films) => {
               setStats(films);
+              updateStats(films);
             });
         });
 
@@ -329,7 +344,7 @@ const renderFilms = (dist, filmsInner) => {
   }
 };
 
-doc.addEventListener(`change`, (evt) => {
+document.addEventListener(`change`, (evt) => {
   if (evt.target.name === `statistic-filter`) {
     let newArr = [];
 
