@@ -13,13 +13,14 @@ import {getMax} from "./my-chart";
 const mainContainer = document.querySelector(`.main`);
 const filmsWrapper = document.querySelector(`.films`);
 const filmsContainer = document.querySelector(`.films .films-list__container`);
+const filmsContainerTopRated = document.querySelectorAll(`.films-list--extra`)[0].querySelector(`.films-list__container`);
+const filmsContainerTopCommented = document.querySelectorAll(`.films-list--extra`)[1].querySelector(`.films-list__container`);
 const filtersContainer = document.querySelector(`.main-navigation`);
 const headerLogo = document.querySelector(`.header__logo.logo`);
-const AUTHORIZATION = `Basic A8XiP3pLcHAFj3kt=`;
+const AUTHORIZATION = `Basic A8XiP3pLcHBFj3kt=`;
 const END_POINT = ` https://es8-demo-srv.appspot.com/moowle`;
 const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
 const filtersArray = [`all`, `watchlist`, `history`, `stats`];
-
 const RATINGS_NOVICE = 10;
 const RATINGS_FAN = 20;
 const RATINGS_MORE_BUFF = 21;
@@ -27,16 +28,60 @@ const RATINGS_MORE_BUFF = 21;
 let filmFromServer;
 
 filmsContainer.textContent = `Loading movies...`;
-
+let numberItems = 10;
 api.getFilms()
   .then((films) => {
-    filmFromServer = films;
+    filmFromServer = films.slice();
+
+    function setTopRated() {
+      const filmTop = filmFromServer.map((item) => {
+        return item.totalRating;
+      });
+      filmTop.sort(function (left, right) {
+        return right - left;
+      });
+
+      const filmTopNew = filmFromServer.filter((item) => {
+        return item.totalRating === filmTop[0] || item.totalRating === filmTop[1];
+      });
+
+      const arr = [];
+
+      arr.push(filmTopNew[0]);
+      arr.push(filmTopNew[1]);
+
+      renderFilms(filmsContainerTopRated, arr);
+    }
+
+    setTopRated();
+
+    function setTopCommented() {
+      const filmTop = filmFromServer.map((item) => {
+        return item.comments.length;
+      });
+      filmTop.sort(function (left, right) {
+        return right - left;
+      });
+      const filmTopNew = filmFromServer.filter((item) => {
+        return item.comments.length === filmTop[0] || item.comments.length === filmTop[1];
+      });
+
+      const arr = [];
+
+      arr.push(filmTopNew[0]);
+      arr.push(filmTopNew[1]);
+
+      renderFilms(filmsContainerTopCommented, arr);
+    }
+
+    setTopCommented();
+
+    films.splice(5);
     renderFilms(filmsContainer, films);
-    const arrWatched = filmFromServer.filter((it) => it.isWatched);
+    const arrWatched = films.filter((it) => it.isWatched);
     mainContainer.appendChild(statistics(arrWatched));
     const statisticsRank = document.querySelector(`.statistic__rank`);
     statisticsRank.insertAdjacentElement(`afterend`, period());
-
     const search = new Search(films);
     search.render();
     headerLogo.insertAdjacentElement(`afterend`, search.element);
@@ -51,6 +96,17 @@ api.getFilms()
   .catch(() => {
     filmsContainer.textContent = `Something went wrong while loading your tasks. Check your connection or try again later`;
   });
+
+document.querySelector(`.films-list__show-more`).addEventListener(`click`, () => {
+  const filmsToRender = filmFromServer.slice();
+  filmsToRender.splice(numberItems);
+  if (numberItems >= filmFromServer.length) {
+    document.querySelector(`.films-list__show-more`).remove();
+  }
+  numberItems += 5;
+
+  renderFilms(filmsContainer, filmsToRender);
+});
 
 function setTitle() {
 
