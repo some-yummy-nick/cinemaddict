@@ -216,8 +216,7 @@ function updateStats(newFilms) {
 const renderFilms = (dist, filmsInner) => {
   dist.innerHTML = ``;
 
-  for (let i = 0; i < filmsInner.length; i++) {
-    const film = filmsInner[i];
+  for (let film of filmsInner) {
     const filmComponent = new Film(film);
     const popup = new Popup(film);
 
@@ -397,7 +396,10 @@ const renderFilms = (dist, filmsInner) => {
     popup.onEnd = () => {
       popup.unrender();
     };
+
   }
+
+
 };
 
 document.addEventListener(`change`, (evt) => {
