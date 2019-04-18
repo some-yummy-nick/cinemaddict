@@ -2,6 +2,7 @@ import Film from './film';
 import Filter from './filter';
 import Search from './search';
 import Popup from './popup';
+import Stat from './stat';
 import statistics from './statistics';
 import getChart from "./my-chart";
 import API from './api';
@@ -26,6 +27,7 @@ const RATINGS_FAN = 20;
 const RATINGS_MORE_BUFF = 21;
 
 let filmFromServer;
+let stat;
 
 filmsContainer.textContent = `Loading movies...`;
 let numberItems = 10;
@@ -79,9 +81,9 @@ api.getFilms()
     films.splice(5);
     renderFilms(filmsContainer, films);
     const arrWatched = films.filter((it) => it.isWatched);
-    mainContainer.appendChild(statistics(arrWatched));
-    const statisticsRank = document.querySelector(`.statistic__rank`);
-    statisticsRank.insertAdjacentElement(`afterend`, period());
+    // mainContainer.appendChild(statistics(arrWatched));
+    // const statisticsRank = document.querySelector(`.statistic__rank`);
+    // statisticsRank.insertAdjacentElement(`afterend`, period());
     const search = new Search(films);
     search.render();
     headerLogo.insertAdjacentElement(`afterend`, search.element);
@@ -91,7 +93,8 @@ api.getFilms()
       });
       renderFilms(filmsContainer, newArr);
     };
-    setStats(films);
+    console.log(3);
+    setStats(filmFromServer);
   })
   .catch(() => {
     filmsContainer.textContent = `Something went wrong while loading your tasks. Check your connection or try again later`;
@@ -157,7 +160,7 @@ function setFilter() {
         case `stats`: {
           const newArr = filmFromServer.filter((it) => it.isWatched);
 
-          return statistics(newArr);
+          // return statistics(newArr);
         }
 
         default:
@@ -173,16 +176,22 @@ setFilter();
 
 function setStats(filmsToStat) {
   const menuItems = document.querySelectorAll(`.main-navigation__item`);
+  stat = new Stat(filmsToStat);
+
+  mainContainer.appendChild(stat.render());
 
   for (let item of menuItems) {
     item.addEventListener(`click`, function () {
-      const statisticsContainer = document.querySelector(`.statistic`);
+
       if (item.classList.contains(`js-stats`)) {
-        getChart(filmsToStat);
+
+        let statisticsContainer = document.querySelector(`.statistic`);
+
+        // getChart(filmsToStat);
         statisticsContainer.classList.remove(`visually-hidden`);
         filmsWrapper.classList.add(`visually-hidden`);
       } else {
-        statisticsContainer.classList.add(`visually-hidden`);
+        document.querySelector(`.statistic`).classList.add(`visually-hidden`);
         filmsWrapper.classList.remove(`visually-hidden`);
       }
 
@@ -237,7 +246,7 @@ const renderFilms = (dist, filmsInner) => {
           setFilter();
           api.getFilms()
             .then((films) => {
-              setStats(films);
+              // setStats(films);
               updateStats(films);
             });
         });
@@ -265,7 +274,8 @@ const renderFilms = (dist, filmsInner) => {
           setFilter();
           api.getFilms()
             .then((films) => {
-              setStats(films);
+              // setStats(films);
+              stat.update(films);
               updateStats(films);
             });
         });
@@ -283,7 +293,7 @@ const renderFilms = (dist, filmsInner) => {
           filmComponent.update(newFilm);
           api.getFilms()
             .then((films) => {
-              setStats(films);
+              // setStats(films);
               updateStats(films);
             });
         });
@@ -300,7 +310,7 @@ const renderFilms = (dist, filmsInner) => {
           setFilter();
           api.getFilms()
             .then((films) => {
-              setStats(films);
+              // setStats(films);
               updateStats(films);
             });
         });
