@@ -37,7 +37,12 @@ export default class Statistics extends Component {
       return item.duration;
     });
 
-    const totalDuration = duration.reduce(reducer);
+    let totalDuration = 0;
+
+    if (duration.length) {
+      totalDuration = duration.reduce(reducer);
+    }
+
     rank.textContent = `${popularGenre.genre}-Fighter`;
     watched.textContent = watchedNumber;
     topGenre.textContent = popularGenre.genre;
